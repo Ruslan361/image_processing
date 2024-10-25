@@ -6,22 +6,12 @@
 
 ## Установка
 
-### 1. Docker
-
-**1.1. Загрузка образа из Docker Hub:**
-
-Предварительно собранный образ приложения доступен на Docker Hub. Загрузите его с помощью следующей команды:
-
-```bash
-docker pull ruslan413/image_processing_app
-```
-
-**1.2. Запуск контейнера:**
+**1.1. Запуск контейнера:**
 
 Запустите контейнер Docker с помощью следующей команды:
 
 ```bash
-docker run -it --rm -p 5900:5900 -v (путь до папки с изображением):/data  image_processing_app *> log.txt
+docker run -it --rm -p 5900:5900 -v "C:\Users\Professional\Downloads\Здоровая кожа:/data"  ruslan413/image_processing_app
 ```
 
 **Объяснение параметров:**
