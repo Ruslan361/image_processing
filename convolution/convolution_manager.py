@@ -37,3 +37,5 @@ class ConvolutionManager(Manager):
     def connectButton(self):
         self.ui.loadButton.clicked.connect(self.behavior.pushLoadButton)
         self.ui.convolutionButton.clicked.connect(self.behavior.pushConvolutionButton)
+        self.ui.saveImageButton.clicked.connect(self.behavior.pushSaveImageButton)
+        self.ui.saveSettingsButton.clicked.connect(self.behavior.pushSaveSettingsButton)
