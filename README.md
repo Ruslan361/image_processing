@@ -68,7 +68,7 @@ Environment.yml - это файл, описывающий зависимости
 
 **3.1. Environment.yml:**
 
-Файл `environment.yml` уже создан и содержит список необходимых пакетов Python, включая Python 3.8, OpenCV, NumPy и другие.
+Файл `environment.yml` уже создан и содержит список необходимых пакетов Python, включая Python 3.11, OpenCV, NumPy и другие.
 
 **3.2. Создание окружения Conda:**
 
