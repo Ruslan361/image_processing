@@ -1,0 +1,30 @@
+{
+    "gaussian blur": {
+        "sigmaX": 0,
+        "sigmaY": 0,
+        "kernel": [
+            15,
+            15
+        ],
+        "cmaps": [
+            "viridis",
+            "gray",
+            "plasma",
+            "inferno",
+            "magma",
+            "cividis"
+        ],
+        "active_cmap": "viridis"
+    },
+    "convolution": {
+        "cmaps": [
+            "viridis",
+            "gray",
+            "plasma",
+            "inferno",
+            "magma",
+            "cividis"
+        ],
+        "active_cmap": "viridis"
+    }
+}
