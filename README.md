@@ -13,7 +13,7 @@
 Предварительно собранный образ приложения доступен на Docker Hub. Загрузите его с помощью следующей команды:
 
 ```bash
-docker pull ruslan413/image_processing_app:tagname
+docker pull ruslan413/image_processing_app
 ```
 
 **1.2. Запуск контейнера:**
