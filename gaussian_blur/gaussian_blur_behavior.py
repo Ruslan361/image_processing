@@ -65,8 +65,9 @@ class GaussianBlurBehavior:
             raise Exception("Значения σx и σy должны быть положительными числами.")
         
     def showMean(self):
-        mean = self.imageProcessor.calculateMeanL()
-        self.ui.meanLabelSetText(mean)
+        if not self.imageProcessor is None:
+            mean = self.imageProcessor.calculateMeanL()
+            self.ui.meanLabelSetText(mean)
 
 
 
