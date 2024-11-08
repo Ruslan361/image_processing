@@ -1,6 +1,7 @@
 from gaussian_blur.gaussian_blur_manager import GaussianBlurManager
 from convolution.convolution_manager import ConvolutionManager
 from PySide6.QtWidgets import QMainWindow, QTabWidget, QApplication
+from vertical_slices.vertical_slices_manager import VerticalSlicesManager
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,6 +30,10 @@ class MainWindow(QMainWindow):
         # Добавляем вкладки в QTabWidget
         self.tab_widget.addTab(gaussianTab, "Размытие по Гауссу")
         self.tab_widget.addTab(convolutionTab, "Свертка")
+
+        self.slicesManager = VerticalSlicesManager()
+        slicesTab = self.slicesManager.ui
+        self.tab_widget.addTab(slicesTab, "Среднее по вертикальным срезам")
 
 if __name__ == "__main__":
     app = QApplication([])

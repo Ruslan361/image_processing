@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDialogButtonBox, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QVBoxLayout, QLineEdit, QLabel, QDialog, QComboBox
+from PySide6.QtWidgets import QDialogButtonBox, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, QDialog, QComboBox, QTableWidget
 from PySide6.QtGui import QDoubleValidator, QIntValidator, QImage
 import numpy as np
 import cv2
@@ -64,7 +64,26 @@ class GraphLayout(QVBoxLayout):
     def draw(self):
         self.canvas.Draw()
 
+class TableWidget(QWidget):
+    def __init__(self, headers):
+        super().__init__()
 
+        self.table = QTableWidget()
+        self.table.setColumnCount(len(headers))
+        self.table.setHorizontalHeaderLabels(headers)
+        layout = QVBoxLayout()
+        layout.addWidget(self.table)
+        self.setLayout(layout)
+
+    def add_row(self, data):
+        row_count = self.table.rowCount()
+        self.table.insertRow(row_count)
+        for col, value in enumerate(data):
+            item = QTableWidgetItem(str(value))
+            self.table.setItem(row_count, col, item)
+
+    def clear_table(self):
+        self.table.setRowCount(0)
 
 class MatplotlibImageWidget(QWidget):
     def __init__(self, parent=None):
