@@ -8,12 +8,17 @@ class GaussianBlurWidget(QWidget):
 
         self.loadButton = QPushButton(text="Загрузить изображение")
         self.blurButton = QPushButton(text="Применить размытие")
+        self.saveImageButton = QPushButton(text="Сохранить изображение")
+        self.saveSettingsButton = QPushButton(text="Сохранить настройки")
 
         mainLayout = QVBoxLayout()
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.loadButton)
         buttonLayout.addWidget(self.blurButton)
+        buttonLayout.addWidget(self.saveImageButton)
+        buttonLayout.addWidget(self.saveSettingsButton)
         mainLayout.addLayout(buttonLayout)
+
         self.kernelInput = KernelSizeInput("Размер ядра")
         mainLayout.addLayout(self.kernelInput)
         self.sigmaLoyaut = SigmaLoyaut()
@@ -55,6 +60,7 @@ class GaussianBlurWidget(QWidget):
             'cmaps' : cmaps,
             'active_cmap' : activeCMap
         }
+        return data
     def showImage(self, image: np.ndarray, cmap: str = None) -> None:
         self.imageWidget.show_image(image, cmap)
     def getKernel(self):

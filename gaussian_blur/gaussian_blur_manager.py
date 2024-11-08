@@ -22,7 +22,7 @@ class GaussianBlurManager(Manager):
         group = 'gaussian blur'
         default_data = {'sigmaX': 0, 'sigmaY': 0, 'kernel': (15, 15), 'cmaps': ['viridis','gray', 'plasma', 'inferno', 'magma', 'cividis'], 'active_cmap': 'viridis'}
         try:
-            data = dataHandler.load()
+            data = dataHandler.load("gaussian blur")
         except Exception as e:
             dataHandler.write(group, default_data)
             data = dataHandler.load(group)
@@ -32,4 +32,6 @@ class GaussianBlurManager(Manager):
     def connectButton(self):
         self.ui.loadButton.clicked.connect(self.behavior.pushLoadButton)
         self.ui.blurButton.clicked.connect(self.behavior.pushBlurButton)
+        self.ui.saveImageButton.clicked.connect(self.behavior.pushSaveImageButton)
+        self.ui.saveSettingsButton.clicked.connect(self.behavior.pushSaveSettingsButton)
 

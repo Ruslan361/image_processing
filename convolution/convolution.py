@@ -7,11 +7,15 @@ class ConvolutionWidget(QWidget):
 
         self.loadButton = QPushButton(text="Загрузить изображение")
         self.convolutionButton = QPushButton(text="Применить свертку")
+        self.saveImageButton = QPushButton(text="Сохранить изображение")
+        self.saveSettingsButton = QPushButton(text="Сохранить настройки")
 
         mainLayout = QVBoxLayout()
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.loadButton)
         buttonLayout.addWidget(self.convolutionButton)
+        buttonLayout.addWidget(self.saveImageButton)
+        buttonLayout.addWidget(self.saveSettingsButton)
         mainLayout.addLayout(buttonLayout)
 
         self.cmapLoyaut = CmapLoyaut()

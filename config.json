@@ -1,11 +1,11 @@
 {
     "gaussian blur": {
-        "sigmaX": 0,
-        "sigmaY": 0,
         "kernel": [
             15,
             15
         ],
+        "sigmaX": 0.0,
+        "sigmaY": 0.0,
         "cmaps": [
             "viridis",
             "gray",

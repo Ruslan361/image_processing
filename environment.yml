@@ -1,0 +1,13 @@
+name: image_analysis
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - pyside6
+  - opencv
+  - matplotlib
+
+prefix: C:\Users\Ruslan\.conda\envs\image_analysis
