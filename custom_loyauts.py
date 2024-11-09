@@ -104,7 +104,7 @@ class MatplotlibImageWidget(QWidget):
         """Отображает изображение на виджете."""
         self.ax.clear()  # Очищаем оси перед отображением нового изображения
         self.ax.set_axis_off()
-        self.ax.imshow(image, cmap) 
+        self.ax.imshow(image[::-1], cmap, origin='lower') 
         self.canvas.draw()
 
 class MatplotlibGraph(FigureCanvas):

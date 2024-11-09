@@ -61,9 +61,14 @@ class VerticalSlicesBehavior:
 
         self.update_vertical_lines(slice_values)
         end_pixel = 0
+        image_height = self.imageProcessor.image.shape[0]
+        image_width = self.imageProcessor.image.shape[1]
         slice_values.append(int(self.ui.slider.get_maximum()))
         for i, (x, mean) in enumerate(zip(slice_values, means)):
             interval_str = f"{end_pixel}-{x}"
-            self.ui.ax.axhline(int(mean), end_pixel, x, color='red', linewidth=1)
+            # end_pixel, x,
+            self.ui.ax.axhline(int((mean / 256) * image_height), end_pixel / image_width, x/image_width, color='red', linewidth=1)
             self.ui.add_column_to_table(interval_str, mean)  # Add column to table
             end_pixel = x
+
+        self.ui.imageWidget.canvas.draw()
