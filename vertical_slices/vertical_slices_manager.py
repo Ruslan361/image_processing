@@ -7,6 +7,7 @@ class VerticalSlicesManager(Manager):
         self.ui = VerticalSlicesWidget()
         self.behavior = VerticalSlicesBehavior(self.ui)
         self.connectButton()
+        self.ui.slider.valuesChanged.connect(self.behavior.update_vertical_lines) # Connect slider to update lines
     def getUi(self):
         return self.ui
     def getBehavior(self):

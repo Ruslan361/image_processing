@@ -20,14 +20,14 @@ class VerticalSlicesBehavior:
             self.imageProcessor = ImageProcessor(image)
             width = self.imageProcessor.image.shape[1]
             self.ui.set_slider_range(1, width - 2)
-            rgbImage = self.imageProcessor.getRGBimage()
-            self.ui.imageWidget.show_image(rgbImage)
+            blured = self.imageProcessor.blurGaussian((3, 3), 0, 0)
+            self.ui.imageWidget.show_image(blured, "viridis")
 
         except ValueError as e:
-            QMessageBox.warning(self.ui, "Ошибка", "Не удалось загрузить изображение. Пожалуйста, попробуйте еще раз.", QMessageBox.Ok)
+           QMessageBox.warning(self.ui, "Ошибка", "Не удалось загрузить изображение. Пожалуйста, попробуйте еще раз.", QMessageBox.Ok)
         except Exception as e:
-            dialog = ErrorDialog(str(e))
-            dialog.exec()
+           dialog = ErrorDialog(str(e))
+           dialog.exec()
 
 
     def pushSlicesButton(self):
@@ -41,6 +41,13 @@ class VerticalSlicesBehavior:
 
     def isImageEmpty(self):
         return self.imageProcessor is None
+    
+    def update_vertical_lines(self, values):
+        for line in self.ui.ax.lines:  # Iterate over the lines and remove them
+            line.remove()
+        for value in values:
+            self.ui.ax.axvline(value, color='red')
+        self.ui.imageWidget.canvas.draw()
 
     def calculate_and_plot_means(self):
         slice_values = self.ui.getSliceValues()
@@ -52,10 +59,11 @@ class VerticalSlicesBehavior:
         
         means = self.imageProcessor.calculateMeanRelativeToPartition(slice_values)
 
-
+        self.update_vertical_lines(slice_values)
         end_pixel = 0
         slice_values.append(int(self.ui.slider.get_maximum()))
         for i, (x, mean) in enumerate(zip(slice_values, means)):
             interval_str = f"{end_pixel}-{x}"
+            self.ui.ax.axhline(int(mean), end_pixel, x, color='red', linewidth=1)
             self.ui.add_column_to_table(interval_str, mean)  # Add column to table
             end_pixel = x
