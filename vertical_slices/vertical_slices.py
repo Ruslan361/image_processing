@@ -17,6 +17,7 @@ class VerticalSlicesWidget(QWidget):
 
         self.slider = MultiThumbSlider(1, 100, 2, 1)
         self.slider.valuesChanged.connect(self.update_slider_labels)
+        self.slider.valuesChanged.connect(self.update_vertical_lines) # Connect slider to update lines
         mainLayout.addWidget(self.slider)
 
         self.slider_labels_layout = QHBoxLayout()
@@ -31,9 +32,9 @@ class VerticalSlicesWidget(QWidget):
         self.tableWidget.setHorizontalHeaderLabels(["Интервал", "Среднее"])
         mainLayout.addWidget(self.tableWidget)
 
-
         self.setLayout(mainLayout)
         self.update_slider_labels(self.slider.get_values())
+        self.ax = self.imageWidget.ax # Get the axes
 
     def update_slider_labels(self, values):
         for label in self.slider_labels:
@@ -45,6 +46,14 @@ class VerticalSlicesWidget(QWidget):
             label = QLabel(str(value))
             self.slider_labels_layout.addWidget(label)
             self.slider_labels.append(label)
+
+
+    def update_vertical_lines(self, values):
+        for line in self.ax.lines:  # Iterate over the lines and remove them
+            line.remove()
+        for value in values:
+            self.ax.axvline(value, color='red')
+        self.imageWidget.canvas.draw()
 
 
     def setData(self, data):
