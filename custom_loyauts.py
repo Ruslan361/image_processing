@@ -92,7 +92,8 @@ class MatplotlibImageWidget(QWidget):
         # Создание Figure и FigureCanvas
         self.fig = Figure()
         self.canvas = FigureCanvas(self.fig)
-        self.ax = self.fig.add_subplot(1, 1, 1)  # Добавляем оси
+        #self.ax = self.fig.add_subplot(1, 1, 1)  # Добавляем оси
+        self.ax = self.fig.add_axes([0, 0, 1, 1])
 
         # Настройка layout
         layout = QVBoxLayout()

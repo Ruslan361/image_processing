@@ -28,8 +28,9 @@ class VerticalSlicesWidget(QWidget):
         mainLayout.addWidget(self.imageWidget)
 
         self.tableWidget = QTableWidget()
-        self.tableWidget.setColumnCount(2)
-        self.tableWidget.setHorizontalHeaderLabels(["Интервал", "Среднее"])
+        self.tableWidget.setRowCount(2)
+        self.tableWidget.setVerticalHeaderLabels(["Интервал", "Среднее"])
+        self.tableWidget.setMinimumSize(200, 100)
         mainLayout.addWidget(self.tableWidget)
 
         self.setLayout(mainLayout)
@@ -75,11 +76,11 @@ class VerticalSlicesWidget(QWidget):
         values = self.slider.get_values()
         return [int(val) for val in values]
 
-    def add_row_to_table(self, interval, mean):
-        row_count = self.tableWidget.rowCount()
-        self.tableWidget.insertRow(row_count)
-        self.tableWidget.setItem(row_count, 0, QTableWidgetItem(str(interval)))
-        self.tableWidget.setItem(row_count, 1, QTableWidgetItem(str(mean)))
+    def add_column_to_table(self, interval, mean):
+        column_count = self.tableWidget.columnCount()
+        self.tableWidget.insertColumn(column_count)
+        self.tableWidget.setItem(0, column_count, QTableWidgetItem(str(interval)))
+        self.tableWidget.setItem(1, column_count, QTableWidgetItem(str(mean)))
 
     def clear_table(self):
-        self.tableWidget.setRowCount(0)
+        self.tableWidget.setColumnCount(0)

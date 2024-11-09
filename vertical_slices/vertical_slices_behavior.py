@@ -56,7 +56,6 @@ class VerticalSlicesBehavior:
         end_pixel = 0
         slice_values.append(int(self.ui.slider.get_maximum()))
         for i, (x, mean) in enumerate(zip(slice_values, means)):
-            means.append(mean)
             interval_str = f"{end_pixel}-{x}"
-            self.ui.add_row_to_table(interval_str, mean)  # Add row to table
+            self.ui.add_column_to_table(interval_str, mean)  # Add column to table
             end_pixel = x
