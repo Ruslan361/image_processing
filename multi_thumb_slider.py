@@ -1,85 +1,148 @@
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSizePolicy, QPushButton
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PySide6.QtCore import Qt, QSize, QPoint, QRect, QRectF, Signal, Slot, QEvent
-from PySide6.QtGui import QPainter, QColor, QPen, QMouseEvent, QLinearGradient
-
+from PySide6.QtGui import QPainter, QColor, QPen, QMouseEvent, QLinearGradient, QPaintEvent
 
 class MultiThumbSlider(QWidget):
     valuesChanged = Signal(list)
     thumbReleased = Signal()
-    thumbs_pressed = []
 
-    def __init__(self, minimum, maximum, num_thumbs, initial_values=None):
+    def __init__(self, minimum, maximum, num_thumbs, step, initial_values=None):
         super().__init__()
         self.minimum = minimum
         self.maximum = maximum
         self.num_thumbs = num_thumbs
         self.thumb_size = QSize(12, 20)
         self.thumb_positions = []
-
+        self.step = step
         self.dragging_thumb = -1
         self.track_height = 4
         self.min_distance = 1
 
         if initial_values is None:
-            initial_values = self.calculate_initial_positions(minimum, maximum, num_thumbs, self.min_distance)
+            self.values = self.calculate_initial_positions()
         else:
-            # Проверка на корректность начальных значений
-            if len(initial_values) != num_thumbs:
-                raise ValueError("Number of initial values must match num_thumbs")
-            initial_values.sort()
-            for i in range(1, num_thumbs):
-                if initial_values[i] <= initial_values[i - 1] + self.min_distance:
-                    raise ValueError(
-                        "Initial values must be unique and have at least min_distance between them.")
+            self.validate_initial_values(initial_values)
+            self.values = initial_values
 
-        self.values = initial_values
         self.setMouseTracking(True)
+        self.update()
         self.update_thumb_positions()
         self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+        self.setFixedHeight(20)
 
-        # Кнопки для добавления и удаления ползунков
-        self.add_button = QPushButton("+", self)
-        self.remove_button = QPushButton("-", self)
-        self.add_button.clicked.connect(self.add_thumb)
-        self.remove_button.clicked.connect(self.remove_thumb)
 
-    def calculate_initial_positions(self, minimum, maximum, num_thumbs, min_distance):
-        """Вычисляет начальные позиции ползунков с учётом минимального расстояния."""
-        if num_thumbs <= 1:
-            return [minimum] if num_thumbs == 1 else []
 
-        total_range = maximum - minimum
-        available_range = total_range - (num_thumbs - 1) * min_distance
+    def calculate_initial_positions(self):
+        if self.num_thumbs <= 1:
+            return [self.minimum] if self.num_thumbs == 1 else []
+
+        total_range = self.maximum - self.minimum
+        available_range = total_range - (self.num_thumbs - 1) * self.min_distance
         if available_range <= 0:
             raise ValueError("Not enough space for all thumbs with given min_distance")
 
-        step = available_range / (num_thumbs - 1)
-        positions = [minimum + i * step for i in range(num_thumbs)]
+        step = available_range / (self.num_thumbs - 1)
+        positions = [self.minimum + i * step for i in range(self.num_thumbs)]
 
-        # Добавляем минимальное расстояние:
-        for i in range(1, num_thumbs):
-            positions[i] += i * min_distance
+        for i in range(1, self.num_thumbs):
+            positions[i] += i * self.min_distance
 
         return positions
+
+    def validate_initial_values(self, initial_values):
+        if len(initial_values) != self.num_thumbs:
+            raise ValueError("Number of initial values must match num_thumbs")
+        initial_values.sort()
+        for i in range(1, self.num_thumbs):
+            if initial_values[i] <= initial_values[i - 1] + self.min_distance:
+                raise ValueError("Initial values must be unique and have at least min_distance between them.")
 
     def update_thumb_positions(self):
         range_width = self.width() - self.thumb_size.width()
         if range_width <= 0:
             self.thumb_positions = []
             return
-        self.thumb_positions = [int((v - self.minimum) / (self.maximum - self.minimum) * range_width)
-                                 for v in self.values]
+        self.thumb_positions = [int((v - self.minimum) / (self.maximum - self.minimum) * range_width) for v in self.values]
 
-    def paintEvent(self, event):
+    def get_thumb_rect(self, index):
+        thumb_y = (self.height() - self.thumb_size.height()) // 2
+        return QRect(self.thumb_positions[index], thumb_y, self.thumb_size.width(), self.thumb_size.height())
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            for i, pos in enumerate(self.thumb_positions):
+                if self.get_thumb_rect(i).contains(event.position().toPoint()):
+                    self.dragging_thumb = i
+                    self.update()
+                    break
+        elif event.button() == Qt.RightButton:  # Right-click handling
+            for i in range(len(self.thumb_positions)):
+                if self.get_thumb_rect(i).contains(event.position().toPoint()):
+                    # Remove thumb
+                    self.values.pop(i)
+                    self.num_thumbs -= 1
+                    self.update_thumb_positions()
+                    self.update()
+                    self.valuesChanged.emit(self.values)
+                    return  # Important: Exit after removing a thumb
+
+            # Add a new thumb at the clicked position if not removing
+            pos = event.position().x()
+            range_width = self.width() - self.thumb_size.width()
+            if range_width > 0:
+                value = self.minimum + (self.maximum - self.minimum) * pos / range_width
+                value = round(value / self.step) * self.step  # Snap to step
+
+                # Check if the snapped value is already present
+                if value not in self.values:  # Only add if the value is unique
+                    self.values.append(value)
+                    self.values.sort()
+                    self.num_thumbs += 1
+                    self.update_thumb_positions()
+                    self.update()
+                    self.valuesChanged.emit(self.values)
+        
+
+
+
+    def mouseMoveEvent(self, event):
+        if self.dragging_thumb != -1:
+            range_width = self.width() - self.thumb_size.width()
+            pos = event.position().x()
+            new_value = self.minimum + (pos / range_width) * (self.maximum - self.minimum)
+            new_value = min(max(self.minimum, new_value), self.maximum)
+            new_value = round(new_value / self.step) * self.step  # Snap to step
+
+            # Check for collisions and boundaries:
+            if self.dragging_thumb > 0:
+                new_value = max(new_value, self.values[self.dragging_thumb-1] + self.min_distance)
+            if self.dragging_thumb < self.num_thumbs-1:
+                new_value = min(new_value, self.values[self.dragging_thumb + 1] - self.min_distance)
+
+
+            self.values[self.dragging_thumb] = new_value
+
+
+            self.values.sort()
+            self.update_thumb_positions()
+            self.valuesChanged.emit(self.values)
+            self.update()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton and self.dragging_thumb != -1:
+            self.dragging_thumb = -1
+            self.thumbReleased.emit()
+            self.update()
+
+    def paintEvent(self, event: QPaintEvent):
+        self.update_thumb_positions()
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # Дорожка слайдера
         track_y = (self.height() - self.track_height) // 2
         painter.fillRect(0, track_y, self.width(), self.track_height, QColor(150, 150, 150))
 
-        # Градиентная дорожка (опционально)
         grad = QLinearGradient(0, track_y, self.width(), track_y)
         grad.setColorAt(0, QColor(100, 100, 100))
         grad.setColorAt(1, QColor(200, 200, 200))
@@ -91,97 +154,28 @@ class MultiThumbSlider(QWidget):
             painter.setBrush(QColor(50, 130, 184))
             painter.drawRoundedRect(pos, thumb_y, self.thumb_size.width(), self.thumb_size.height(), 3, 3)
 
-    def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            for i, pos in enumerate(self.thumb_positions):
-                thumb_rect = QRect(pos, 0, self.thumb_size.width(), self.height())
-                if thumb_rect.contains(event.position().toPoint()):
-                    self.dragging_thumb = i
-                    break
-
-    def mouseMoveEvent(self, event: QMouseEvent):
-        if self.dragging_thumb != -1:
-            range_width = self.width() - self.thumb_size.width()
-            if range_width <= 0:
-                return
-
-            new_pos = max(0, min(range_width, event.position().x()))
-            new_value = int(self.minimum + (new_pos / range_width) * (self.maximum - self.minimum))
-
-            # Проверка на пересечение и корректировка позиции
-            new_values = self.values[:]
-            new_values[self.dragging_thumb] = new_value
-            new_values.sort()
-
-            # Корректировка, чтобы предотвратить перекрытие (работает в обе стороны)
-            for i in range(self.num_thumbs - 1):
-                if new_values[i + 1] <= new_values[i] + self.min_distance:
-                    new_values[i + 1] = new_values[i] + self.min_distance
-
-            # Проверка правой границы
-            if new_values[-1] > self.maximum:
-                diff = new_values[-1] - self.maximum
-                for i in range(self.num_thumbs):
-                    new_values[i] -= diff
-
-            self.values = new_values
-            self.update_thumb_positions()
-            self.valuesChanged.emit(self.values)
-            self.update()
-
-    def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self.dragging_thumb = -1
-
-    def resizeEvent(self, event):
-        self.update_thumb_positions()
+    def showEvent(self, event):
+        self.update_thumb_positions() # Если позиции зависят от размера
         self.update()
-
-    def add_thumb(self):
-        self.num_thumbs += 1
-        new_value = (self.maximum + self.minimum) // 2
-        self.values.append(new_value)
-        self.values.sort()
-        # корректируем значения чтобы не было наложений
-        for i in range(self.num_thumbs - 1):
-            if self.values[i + 1] <= self.values[i] + self.min_distance:
-                self.values[i + 1] = self.values[i] + self.min_distance
-        self.update_thumb_positions()
-        self.valuesChanged.emit(self.values)
-        self.update()
-
-    def remove_thumb(self):
-        if self.num_thumbs > 1:
-            self.num_thumbs -= 1
-            self.values.pop()
-            self.update_thumb_positions()
-            self.valuesChanged.emit(self.values)
-            self.update()
-
-    def sizeHint(self):
-        return QSize(200, 40)
-
+        super().showEvent(event) # Важно!
     def get_values(self):
-        return self.values[:]
-
-    def get_values_normalized(self):
-        return [(v - self.minimum) / (self.maximum - self.minimum) for v in self.values]
-
-
+        return self.values
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = QWidget()
     layout = QVBoxLayout()
-    my_slider = MultiThumbSlider(0, 100, 2)
-    label = QLabel(f"Значения: {my_slider.values}")
-
-    button_layout = QVBoxLayout()
-    button_layout.addWidget(my_slider.add_button)
-    button_layout.addWidget(my_slider.remove_button)
-
-    layout.addLayout(button_layout)
+    my_slider = MultiThumbSlider(0, 100, 2, 1)
+    label = QLabel(f"Values: {my_slider.values}") # Fixed label text
     layout.addWidget(my_slider)
     layout.addWidget(label)
     window.setLayout(layout)
+
+    def update_label(values):
+        label.setText(f"Values: {values}")
+
+    my_slider.valuesChanged.connect(update_label)
+
+
     window.show()
     sys.exit(app.exec())

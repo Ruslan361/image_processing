@@ -8,8 +8,8 @@ from vertical_slices.vertical_slices import VerticalSlicesWidget # исправ�
 class VerticalSlicesBehavior:
     def __init__(self, ui: VerticalSlicesWidget):
         self.image_handler = ImageHandler()
-        self.ui = ui
         self.imageProcessor = None
+        self.ui = ui
     def pushLoadButton(self):
         self.tryLoadImage()
 

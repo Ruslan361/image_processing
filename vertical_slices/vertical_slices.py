@@ -15,7 +15,7 @@ class VerticalSlicesWidget(QWidget):
         buttonLayout.addWidget(self.slicesButton)
         mainLayout.addLayout(buttonLayout)
 
-        self.slider = MultiThumbSlider(0, 100, 2)  # Initial range 0-100, 2 thumbs
+        self.slider = MultiThumbSlider(0, 100, 2, 1)  # Initial range 0-100, 2 thumbs
         self.slider.valuesChanged.connect(self.update_slider_labels)  # Connect to update labels
         mainLayout.addWidget(self.slider)
 
@@ -52,7 +52,7 @@ class VerticalSlicesWidget(QWidget):
         self.slider.minimum = min_val
         self.slider.maximum = max_val
         self.slider.update_thumb_positions()
-        self.slider.values = self.slider.calculate_initial_positions(min_val, max_val, self.slider.num_thumbs, self.slider.min_distance)
+        self.slider.values = self.slider.calculate_initial_positions()
         self.update_slider_labels(self.slider.get_values()) # Обновляем лейблы ползунков сразу, чтобы отразить новые значения
         self.slider.update()
 
