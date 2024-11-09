@@ -16,6 +16,7 @@ class MultiThumbSlider(QWidget):
         self.num_thumbs = num_thumbs
         self.thumb_size = QSize(12, 20)
         self.thumb_positions = []
+
         self.dragging_thumb = -1
         self.track_height = 4
         self.min_distance = 1
@@ -42,25 +43,7 @@ class MultiThumbSlider(QWidget):
         self.remove_button = QPushButton("-", self)
         self.add_button.clicked.connect(self.add_thumb)
         self.remove_button.clicked.connect(self.remove_thumb)
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            if self.dragging_thumb != -1:  # Only remove if a thumb was being dragged
-                if self.thumbs_pressed[self.dragging_thumb]: # Check if this thumb was clicked, not just dragged
 
-                    self.remove_thumb(self.dragging_thumb)
-                self.dragging_thumb = -1
-                self.thumbs_pressed = [False] * self.num_thumbs  # Reset after checking
-                self.thumbReleased.emit()
-                self.update()  # redraw
-
-    def remove_thumb(self, index):
-        if self.num_thumbs > 1:
-            self.num_thumbs -= 1
-            self.values.pop(index)
-
-            self.update_thumb_positions()
-            self.valuesChanged.emit(self.values)
-            
     def calculate_initial_positions(self, minimum, maximum, num_thumbs, min_distance):
         """Вычисляет начальные позиции ползунков с учётом минимального расстояния."""
         if num_thumbs <= 1:
@@ -108,15 +91,12 @@ class MultiThumbSlider(QWidget):
             painter.setBrush(QColor(50, 130, 184))
             painter.drawRoundedRect(pos, thumb_y, self.thumb_size.width(), self.thumb_size.height(), 3, 3)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
             for i, pos in enumerate(self.thumb_positions):
                 thumb_rect = QRect(pos, 0, self.thumb_size.width(), self.height())
                 if thumb_rect.contains(event.position().toPoint()):
                     self.dragging_thumb = i
-                    self.thumbs_pressed = [False] * self.num_thumbs  # Track clicked thumbs
-
-                    self.thumbs_pressed[i] = True  # Mark the clicked thumb
                     break
 
     def mouseMoveEvent(self, event: QMouseEvent):
@@ -149,6 +129,9 @@ class MultiThumbSlider(QWidget):
             self.valuesChanged.emit(self.values)
             self.update()
 
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self.dragging_thumb = -1
 
     def resizeEvent(self, event):
         self.update_thumb_positions()

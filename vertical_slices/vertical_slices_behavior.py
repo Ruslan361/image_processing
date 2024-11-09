@@ -1,13 +1,13 @@
-from vertical_slices.vertical_slices import VerticalSlicesWidget
-from image_loader import ImageLoader
+from image_loader import ImageHandler
 from image_processor import ImageProcessor
 import numpy as np
 from PySide6.QtWidgets import QMessageBox
 from custom_loyauts import ErrorDialog, TableWidget
+from vertical_slices.vertical_slices import VerticalSlicesWidget # исправленный импорт
 
 class VerticalSlicesBehavior:
     def __init__(self, ui: VerticalSlicesWidget):
-        self.image_loader = ImageLoader()
+        self.image_handler = ImageHandler()
         self.ui = ui
         self.imageProcessor = None
     def pushLoadButton(self):
@@ -15,12 +15,12 @@ class VerticalSlicesBehavior:
 
     def tryLoadImage(self):
         try:
-            image = self.image_loader.load_image()
+            image = self.image_handler.load_image()
             self.imageProcessor = ImageProcessor(image)
             width = self.imageProcessor.image.shape[1] # image width
             self.ui.set_slider_range(0, width - 1)
             rgbImage = self.imageProcessor.getRGBimage()
-            # self.ui.showImage(rgbImage)  # showImage not defined yet, remove or implement if needed
+            self.ui.imageWidget.show_image(rgbImage) 
 
         except ValueError as e:
             QMessageBox.warning(self.ui, "Ошибка", "Не удалось загрузить изображение. Пожалуйста, попробуйте еще раз.", QMessageBox.Ok)

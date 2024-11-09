@@ -9,6 +9,8 @@ class GaussianBlurBehavior:
     def __init__(self, ui: GaussianBlurWidget):
         self.image_handler = ImageHandler()
         self.ui = ui
+        self.kernel = (3, 3)
+        self.sigma = 0
         self.imageProcessor = None
 
     def pushLoadButton(self):
@@ -34,23 +36,20 @@ class GaussianBlurBehavior:
             QMessageBox.warning(self.ui, "Ошибка", "Сначала загрузите изображение.", QMessageBox.Ok)
             return
         self.image_handler.save_figure(self.ui.imageWidget.fig)
-        
-        
+
 
     def pushBlurButton(self):
         if self.isImageEmpty():
             QMessageBox.warning(self.ui, "Ошибка", "Сначала загрузите изображение.", QMessageBox.Ok)
             return
         self.tryBlurImage()
-
-    def isImageEmpty(self):
-        return self.imageProcessor is None
+        
 
     def tryBlurImage(self):
-        kernel = self.ui.getKernel()
-        sigmas = self.ui.getSigmas()
         cmap = self.ui.getActiveCmap()
         try:
+            kernel = self.ui.getKernel()
+            sigmas = self.ui.getSigmas()
             self.validateKernel(kernel, sigmas)
             bluredImage = self.imageProcessor.blurGaussian(kernel, sigmas[0], sigmas[1])
             self.ui.showImage(bluredImage, cmap)
@@ -58,28 +57,17 @@ class GaussianBlurBehavior:
             QMessageBox.critical(self.ui, "Ошибка", str(e), QMessageBox.Ok)
 
     def validateKernel(self, kernel, sigmas):
+#  σ = 0.3*((ksize-1)*0.5 - 1) + 0.8
         kernel = np.array(kernel, dtype=int)
         if np.any(kernel % 2 == 0) or np.any(kernel <= 0):
             raise Exception("Размер ядра должен быть положительным нечетным числом.")
         if sigmas[0] < 0 or sigmas[1] < 0:
             raise Exception("Значения σx и σy должны быть положительными числами.")
-        
+
     def showMean(self):
         if not self.imageProcessor is None:
             mean = self.imageProcessor.calculateMeanL()
             self.ui.meanLabelSetText(mean)
 
-
-
-        
-
-
-
-
-        
-
-
-
-
-
-        
+    def isImageEmpty(self):
+        return self.imageProcessor is None

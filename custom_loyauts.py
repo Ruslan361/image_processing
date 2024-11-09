@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QDialogButtonBox, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, QDialog, QComboBox, QTableWidget
+from PySide6.QtWidgets import QDialogButtonBox, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QLineEdit, QDialog, QComboBox, QTableWidget, QTableWidgetItem
 from PySide6.QtGui import QDoubleValidator, QIntValidator, QImage
 import numpy as np
 import cv2
