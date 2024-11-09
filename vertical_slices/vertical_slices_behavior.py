@@ -3,13 +3,14 @@ from image_processor import ImageProcessor
 import numpy as np
 from PySide6.QtWidgets import QMessageBox
 from custom_loyauts import ErrorDialog, TableWidget
-from vertical_slices.vertical_slices import VerticalSlicesWidget # исправленный импорт
+from vertical_slices.vertical_slices import VerticalSlicesWidget
 
 class VerticalSlicesBehavior:
     def __init__(self, ui: VerticalSlicesWidget):
         self.image_handler = ImageHandler()
         self.imageProcessor = None
         self.ui = ui
+
     def pushLoadButton(self):
         self.tryLoadImage()
 
@@ -17,10 +18,10 @@ class VerticalSlicesBehavior:
         try:
             image = self.image_handler.load_image()
             self.imageProcessor = ImageProcessor(image)
-            width = self.imageProcessor.image.shape[1] # image width
-            self.ui.set_slider_range(0, width - 1)
+            width = self.imageProcessor.image.shape[1]
+            self.ui.set_slider_range(1, width - 2)
             rgbImage = self.imageProcessor.getRGBimage()
-            self.ui.imageWidget.show_image(rgbImage) 
+            self.ui.imageWidget.show_image(rgbImage)
 
         except ValueError as e:
             QMessageBox.warning(self.ui, "Ошибка", "Не удалось загрузить изображение. Пожалуйста, попробуйте еще раз.", QMessageBox.Ok)
@@ -43,9 +44,19 @@ class VerticalSlicesBehavior:
 
     def calculate_and_plot_means(self):
         slice_values = self.ui.getSliceValues()
-        means = []
-        for i, x in enumerate(slice_values):
-            slice = self.imageProcessor.image[:, x] # берем срез
-            mean = np.mean(slice) # считаем среднее
+        self.ui.clear_table()  # Clear the table before adding new data
+        # means = []
+
+        if not slice_values:
+            return
+        
+        means = self.imageProcessor.calculateMeanRelativeToPartition(slice_values)
+
+
+        end_pixel = 0
+        slice_values.append(int(self.ui.slider.get_maximum()))
+        for i, (x, mean) in enumerate(zip(slice_values, means)):
             means.append(mean)
-        self.ui.plot(np.arange(len(means)), means)
+            interval_str = f"{end_pixel}-{x}"
+            self.ui.add_row_to_table(interval_str, mean)  # Add row to table
+            end_pixel = x

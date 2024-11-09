@@ -160,6 +160,8 @@ class MultiThumbSlider(QWidget):
         super().showEvent(event) # Важно!
     def get_values(self):
         return self.values
+    def get_maximum(self):
+        return self.maximum
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)

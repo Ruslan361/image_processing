@@ -1,5 +1,5 @@
 from custom_loyauts import MatplotlibImageWidget, ErrorDialog
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTableWidget, QTableWidgetItem
 from multi_thumb_slider import MultiThumbSlider
 import numpy as np
 
@@ -15,60 +15,62 @@ class VerticalSlicesWidget(QWidget):
         buttonLayout.addWidget(self.slicesButton)
         mainLayout.addLayout(buttonLayout)
 
-        self.slider = MultiThumbSlider(0, 100, 2, 1)  # Initial range 0-100, 2 thumbs
-        self.slider.valuesChanged.connect(self.update_slider_labels)  # Connect to update labels
+        self.slider = MultiThumbSlider(1, 100, 2, 1)
+        self.slider.valuesChanged.connect(self.update_slider_labels)
         mainLayout.addWidget(self.slider)
 
-        self.slider_labels_layout = QHBoxLayout()  # Layout for slider value labels
-        self.slider_labels = []  # List to hold slider value labels
+        self.slider_labels_layout = QHBoxLayout()
+        self.slider_labels = []
         mainLayout.addLayout(self.slider_labels_layout)
 
         self.imageWidget = MatplotlibImageWidget()
         mainLayout.addWidget(self.imageWidget)
+
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setHorizontalHeaderLabels(["Интервал", "Среднее"])
+        mainLayout.addWidget(self.tableWidget)
+
+
         self.setLayout(mainLayout)
         self.update_slider_labels(self.slider.get_values())
 
     def update_slider_labels(self, values):
-        # Clear existing labels
         for label in self.slider_labels:
             self.slider_labels_layout.removeWidget(label)
             label.deleteLater()
         self.slider_labels.clear()
-        # Add new labels
+
         for value in values:
             label = QLabel(str(value))
             self.slider_labels_layout.addWidget(label)
             self.slider_labels.append(label)
 
 
-
     def setData(self, data):
-        pass #  пока что не нужно
+        pass
 
     def getData(self):
-        return {}  # пока что не нужно
+        return {}
 
     def set_slider_range(self, min_val, max_val):
         self.slider.minimum = min_val
         self.slider.maximum = max_val
         self.slider.update_thumb_positions()
         self.slider.values = self.slider.calculate_initial_positions()
-        self.update_slider_labels(self.slider.get_values()) # Обновляем лейблы ползунков сразу, чтобы отразить новые значения
+        self.update_slider_labels(self.slider.get_values())
         self.slider.update()
 
 
-    def plot(self, x, y):
-        self.imageWidget.clear()
-        self.imageWidget.set_xlabel("Номер среза")
-        self.imageWidget.set_ylabel("Среднее значение")
-        self.imageWidget.plot(x, y)
-        self.imageWidget.Draw()
     def getSliceValues(self):
-        return self.slider.get_values()
+        values = self.slider.get_values()
+        return [int(val) for val in values]
 
+    def add_row_to_table(self, interval, mean):
+        row_count = self.tableWidget.rowCount()
+        self.tableWidget.insertRow(row_count)
+        self.tableWidget.setItem(row_count, 0, QTableWidgetItem(str(interval)))
+        self.tableWidget.setItem(row_count, 1, QTableWidgetItem(str(mean)))
 
-
-
-
-
-
+    def clear_table(self):
+        self.tableWidget.setRowCount(0)

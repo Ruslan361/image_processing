@@ -19,15 +19,25 @@ class ImageProcessor:
     def calculateMeanL(self):
         L = self.getLChanel()
         return np.mean(L)
-    def calculateMeanRelativeToPartition(self, partition: list):
+    def sliceImageVertical(self, partition: list):
         partsOfImage = []
         L = self.getLChanel()
-        print(np.shape(L))
+        #print(np.shape(L))
         endPixelX = 0
         for part in partition:
             imageSlice = L[endPixelX:part, :]
-            print(np.shape(imageSlice))
+            #print(np.shape(imageSlice))
             partsOfImage.append(imageSlice)
+        partsOfImage.append(L[endPixelX:, :])
+        return partsOfImage
+
+    def calculateMeanRelativeToPartition(self, partition: list):
+        partsOfImage = self.sliceImageVertical(partition)
+        means = []
+        for part in partsOfImage:
+            means.append(np.mean(part))
+        return means
+        
 
     def applyConvolution(self, image, kernel):
         return cv2.filter2D(image, -1, kernel)
