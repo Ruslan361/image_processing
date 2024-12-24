@@ -23,12 +23,13 @@ class ImageProcessor:
         partsOfImage = []
         L = self.getLChanel()
         #print(np.shape(L))
-        endPixelX = 0
+        startPixelX = 0
         for part in partition:
-            imageSlice = L[endPixelX:part, :]
+            imageSlice = L[:, startPixelX:part]
             #print(np.shape(imageSlice))
             partsOfImage.append(imageSlice)
-        partsOfImage.append(L[endPixelX:, :])
+            startPixelX = part
+        partsOfImage.append(L[:, startPixelX:])
         return partsOfImage
 
     def calculateMeanRelativeToPartition(self, partition: list):
